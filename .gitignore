@@ -1,25 +1,18 @@
-# 👉 Ne pas versionner les fichiers Terraform d'état
 *.tfstate
 *.tfstate.backup
 
-# 👉 Ne pas versionner les fichiers variables sensibles
 *.tfvars
 
-# 👉 Ne pas versionner le dossier .terraform (plugins, providers, etc.)
 .terraform/
 
-# 👉 VSCode settings (optionnel, si tu utilises VSCode)
 .vscode/
 
-# 👉 Fichiers système Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# 👉 Logs ou fichiers temporaires
 *.log
 
-# 👉 Autres binaires
 *.exe
 *.dll
 *.so
@@ -27,8 +20,6 @@ Desktop.ini
 *.pyc
 __pycache__/
 
-# 👉 MacOS (si jamais tu copies/partages sur Mac)
 .DS_Store
 
-# 👉 NodeJS (si plus tard tu fais du frontend)
 node_modules/
