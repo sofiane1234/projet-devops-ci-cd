@@ -34,8 +34,15 @@ jobs:
       run: flake8 backend
 
     - name: Run Pytest with coverage (XML for SonarCloud)
-      run: pytest backend/tests --cov=backend --cov-report=xml:rapport/reports/coverage.xml --cov-report=term-missing
-    
+      run: |
+        mkdir -p rapport
+        pytest backend/tests --cov=backend \
+          --cov-report=term-missing \
+          --cov-report=xml:rapport/coverage.xml
+
+    - name: Debug coverage file
+      run: ls -l rapport/
+
     - name: Install SonarScanner
       run: |
         curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
@@ -45,19 +52,14 @@ jobs:
     - name: SonarCloud analysis
       run: |
         sonar-scanner \
-        -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
-        -Dsonar.organization=sofiane1234 \
-        -Dsonar.sources=backend \
-        -Dsonar.host.url=https://sonarcloud.io \
-        -Dsonar.login=$SONAR_TOKEN \
-        -Dsonar.python.coverage.reportPaths=rapport/coverage.xml
-    
-    - name: Vérification fichier coverage.xml
-      run: ls -l rapport/
-
+          -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
+          -Dsonar.organization=sofiane1234 \
+          -Dsonar.sources=backend \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.python.coverage.reportPaths=rapport/coverage.xml
 
     - name: Build and push Docker image
       run: |
         docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
-        echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -u "$ACR_USERNAME" --password-stdin
-        docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
+        echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -
