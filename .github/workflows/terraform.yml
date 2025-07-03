@@ -33,12 +33,19 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
+      - name: Générer variables.auto.tfvars
+        run: |
+          echo 'subscription_id = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)"' > infra/terraform/github.auto.tfvars
+          echo 'client_id       = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)"' >> infra/terraform/github.auto.tfvars
+          echo 'client_secret   = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)"' >> infra/terraform/github.auto.tfvars
+          echo 'tenant_id       = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)"' >> infra/terraform/github.auto.tfvars
+
       - name: Terraform Init
         run: terraform -chdir=infra/terraform init -input=false -no-color
 
       - name: Terraform Plan
-        run: terraform -chdir=infra/terraform plan -input=false -no-color -lock=false -var-file=terraform.tfvars -out=tfplan
+        run: terraform -chdir=infra/terraform plan -input=false -no-color -lock=false -out=tfplan
 
-  #- name: Terraform Apply
-    #  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #  run: terraform apply -input=false -no-color tfplan -chdir=infra/terraform
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform -chdir=infra/terraform apply -input=false -no-color tfplan
