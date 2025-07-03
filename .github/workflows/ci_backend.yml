@@ -27,6 +27,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        echo "Installing..."
         pip install -r backend/requirements.txt
         pip install flake8 pytest pytest-cov
 
@@ -69,3 +70,4 @@ jobs:
         docker tag acrdevopssosso.azurecr.io/backend:${{ github.sha }} acrdevopssosso.azurecr.io/backend:latest
         docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
         docker push acrdevopssosso.azurecr.io/backend:latest
+        
