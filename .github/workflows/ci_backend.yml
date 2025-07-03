@@ -59,7 +59,13 @@ jobs:
           -Dsonar.login=$SONAR_TOKEN \
           -Dsonar.python.coverage.reportPaths=rapport/coverage.xml
 
+    - name: Docker login to ACR
+      run: |
+        echo "${ACR_PASSWORD}" | docker login acrdevopssosso.azurecr.io -u "${ACR_USERNAME}" --password-stdin
+
     - name: Build and push Docker image
       run: |
         docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
-        echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -
+        docker tag acrdevopssosso.azurecr.io/backend:${{ github.sha }} acrdevopssosso.azurecr.io/backend:latest
+        docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
+        docker push acrdevopssosso.azurecr.io/backend:latest
