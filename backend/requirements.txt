@@ -1,9 +1,4 @@
 fastapi
 uvicorn
-requests
 pytest
 pytest-cov
-flake8
-pydantic
-httpx
-

@@ -1,0 +1,57 @@
+name: CI Frontend React
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  frontend-ci:
+    runs-on: ubuntu-latest
+
+    env:
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm install
+
+    - name: Lint (ESLint)
+      working-directory: frontend
+      run: npm run lint
+      continue-on-error: true  # Optionnel si eslint n’est pas encore activé
+
+    - name: Run tests (Jest)
+      working-directory: frontend
+      run: npm test -- --watchAll=false
+
+    - name: Build React app
+      working-directory: frontend
+      run: npm run build
+
+    - name: Docker login
+      run: |
+        echo "${ACR_PASSWORD}" | docker login acrdevopssosso.azurecr.io -u "${ACR_USERNAME}" --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t acrdevopssosso.azurecr.io/frontend:${{ github.sha }} frontend/
+        docker tag acrdevopssosso.azurecr.io/frontend:${{ github.sha }} acrdevopssosso.azurecr.io/frontend:latest
+        docker push acrdevopssosso.azurecr.io/frontend:${{ github.sha }}
+        docker push acrdevopssosso.azurecr.io/frontend:latest
+
+    - name: Scan vulnérabilités avec Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+        trivy image acrdevopssosso.azurecr.io/frontend:latest
