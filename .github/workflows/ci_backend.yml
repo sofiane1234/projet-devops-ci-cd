@@ -19,10 +19,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install --no-cache-dir -r backend/requirements.txt
-          pip install --no-cache-dir flake8 pytest pytest-cov sonar-scanner
+          pip install --no-cache-dir flake8 pytest pytest-cov
 
       - name: Lint the backend code
         run: flake8 backend
@@ -30,9 +30,33 @@ jobs:
       - name: Run unit tests
         run: pytest backend/tests --cov=backend --cov-report=term-missing
 
-      - name: Run SonarCloud analysis
+      - name: Install SonarScanner
+        run: |
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
+
+      - name: Analyse statique avec SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=sof
+            -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
+            -Dsonar.organization=sofiane1234 \
+            -Dsonar.sources=backend \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
+
+      - name: Extract ACR credentials from JSON
+        run: |
+          ACR_USERNAME=$(echo '${{ secrets.ACR_CREDENTIALS }}' | jq -r .username)
+          ACR_PASSWORD=$(echo '${{ secrets.ACR_CREDENTIALS }}' | jq -r .passwords[0].value)
+          echo "ACR_USERNAME=$ACR_USERNAME" >> $GITHUB_ENV
+          echo "ACR_PASSWORD=$ACR_PASSWORD" >> $GITHUB_ENV
+
+      - name: Build & Push Docker image to ACR
+        run: |
+          docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
+          echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -u "$ACR_USERNAME" --password-stdin
+          docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
