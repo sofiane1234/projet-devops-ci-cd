@@ -25,6 +25,10 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Check secret content (debug)
+        run: echo "${{ secrets.AZURE_CREDENTIALS }}" | head -n 1
+    
 
       - name: Terraform Init
         run: terraform -chdir=infra/terraform init -input=false -no-color
