@@ -30,7 +30,7 @@ jobs:
     - name: Lint (ESLint)
       working-directory: frontend
       run: npm run lint
-      continue-on-error: true  # OK si ESLint pas encore configuré
+      continue-on-error: true
 
     - name: Run tests (Jest)
       working-directory: frontend
@@ -54,5 +54,4 @@ jobs:
     - name: Scan vulnérabilités avec Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-        echo "$PWD/bin" >> $GITHUB_PATH
-        trivy image acrdevopssosso.azurecr.io/frontend:latest
+        ./bin/trivy image acrdevopssosso.azurecr.io/frontend:latest
