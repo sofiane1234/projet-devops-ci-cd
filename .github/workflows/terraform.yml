@@ -33,23 +33,26 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
-      - name: Générer github.auto.tfvars
+      - name: Générer github.auto.tfvars avec credentials + mot de passe
         run: |
           SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)
           CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)
           CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)
           TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)
 
-          echo "subscription_id = \"$SUBSCRIPTION_ID\"" > infra/terraform/github.auto.tfvars
-          echo "client_id       = \"$CLIENT_ID\""       >> infra/terraform/github.auto.tfvars
-          echo "client_secret   = \"$CLIENT_SECRET\""   >> infra/terraform/github.auto.tfvars
-          echo "tenant_id       = \"$TENANT_ID\""       >> infra/terraform/github.auto.tfvars
+          POSTGRES_PWD="Draris_1126?"  # injecté ici sans besoin d’autre secret
+
+          echo "subscription_id         = \"$SUBSCRIPTION_ID\"" > infra/terraform/github.auto.tfvars
+          echo "client_id               = \"$CLIENT_ID\""       >> infra/terraform/github.auto.tfvars
+          echo "client_secret           = \"$CLIENT_SECRET\""   >> infra/terraform/github.auto.tfvars
+          echo "tenant_id               = \"$TENANT_ID\""       >> infra/terraform/github.auto.tfvars
+          echo "postgres_admin_password = \"$POSTGRES_PWD\""   >> infra/terraform/github.auto.tfvars
 
       - name: Terraform Init
         run: terraform -chdir=infra/terraform init -input=false -no-color
 
       - name: Terraform Plan
-        run: terraform -chdir=infra/terraform plan -input=false -no-color -lock=false -var-file=terraform.tfvars -out=tfplan
+        run: terraform -chdir=infra/terraform plan -input=false -no-color -lock=false -out=tfplan
 
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
