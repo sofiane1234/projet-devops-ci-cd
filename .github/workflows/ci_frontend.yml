@@ -2,9 +2,9 @@ name: CI Frontend React
 
 on:
   push:
-    branches: [ main, test-ci ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, test-ci ]
+    branches: [ main ]
 
 jobs:
   frontend-ci:
@@ -30,7 +30,7 @@ jobs:
     - name: Lint (ESLint)
       working-directory: frontend
       run: npm run lint
-      continue-on-error: true  # Optionnel si eslint n’est pas encore activé
+      continue-on-error: true  # OK si ESLint pas encore configuré
 
     - name: Run tests (Jest)
       working-directory: frontend
@@ -54,4 +54,5 @@ jobs:
     - name: Scan vulnérabilités avec Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+        echo "$PWD/bin" >> $GITHUB_PATH
         trivy image acrdevopssosso.azurecr.io/frontend:latest
