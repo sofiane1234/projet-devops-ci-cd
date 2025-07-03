@@ -1,0 +1,38 @@
+name: CI Backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-analyse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --no-cache-dir -r backend/requirements.txt
+          pip install --no-cache-dir flake8 pytest pytest-cov sonar-scanner
+
+      - name: Lint the backend code
+        run: flake8 backend
+
+      - name: Run unit tests
+        run: pytest backend/tests --cov=backend --cov-report=term-missing
+
+      - name: Run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=sof
