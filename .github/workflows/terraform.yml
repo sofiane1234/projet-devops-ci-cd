@@ -27,10 +27,10 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Terraform Init
-      run: terraform -chdir=init infra/terraform
+      run: terraform init -chdir=infra/terraform
 
     - name: Terraform Plan
-      run: terraform chdir=plan -out=tfplan -input=false -lock=false -var-file=infra/terraform/terraform.tfvars
+      run: terraform plan -out=tfplan -input=false -lock=false -var-file=infra/terraform/terraform.tfvars
 
     #- name: Terraform Apply
     #  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
