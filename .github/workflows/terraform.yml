@@ -54,6 +54,6 @@ jobs:
       - name: Terraform Plan
         run: terraform -chdir=infra/terraform plan -input=false -no-color -lock=false -out=tfplan
 
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform -chdir=infra/terraform apply -input=false -no-color tfplan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform -chdir=infra/terraform apply -input=false -no-color tfplan
