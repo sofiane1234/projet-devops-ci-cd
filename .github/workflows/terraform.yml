@@ -33,12 +33,17 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
-      - name: Générer variables.auto.tfvars
+      - name: Générer github.auto.tfvars
         run: |
-          echo 'subscription_id = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)"' > infra/terraform/github.auto.tfvars
-          echo 'client_id       = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)"' >> infra/terraform/github.auto.tfvars
-          echo 'client_secret   = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)"' >> infra/terraform/github.auto.tfvars
-          echo 'tenant_id       = "$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)"' >> infra/terraform/github.auto.tfvars
+          SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)
+          CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)
+          CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)
+          TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)
+
+          echo "subscription_id = \"$SUBSCRIPTION_ID\"" > infra/terraform/github.auto.tfvars
+          echo "client_id       = \"$CLIENT_ID\""       >> infra/terraform/github.auto.tfvars
+          echo "client_secret   = \"$CLIENT_SECRET\""   >> infra/terraform/github.auto.tfvars
+          echo "tenant_id       = \"$TENANT_ID\""       >> infra/terraform/github.auto.tfvars
 
       - name: Terraform Init
         run: terraform -chdir=infra/terraform init -input=false -no-color
