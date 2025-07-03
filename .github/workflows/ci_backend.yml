@@ -25,16 +25,22 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install deps
       run: |
         pip install -r backend/requirements.txt
         pip install flake8 pytest pytest-cov
 
-    - name: Lint with Flake8
+    - name: Lint
       run: flake8 backend
 
-    - name: Run tests with coverage
+    - name: Run tests
       run: pytest backend/tests --cov=backend --cov-report=term-missing
+
+    - name: Install SonarScanner
+      run: |
+        curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+        unzip sonar-scanner.zip
+        echo "$(pwd)/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
 
     - name: SonarCloud analysis
       run: |
