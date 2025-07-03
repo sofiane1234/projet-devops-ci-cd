@@ -51,6 +51,9 @@ jobs:
         -Dsonar.host.url=https://sonarcloud.io \
         -Dsonar.login=$SONAR_TOKEN \
         -Dsonar.python.coverage.reportPaths=rapport/coverage.xml
+    
+    - name: Vérification fichier coverage.xml
+      run: ls -l rapport/
 
 
     - name: Build and push Docker image
