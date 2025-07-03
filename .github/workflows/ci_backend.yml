@@ -27,7 +27,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo "Installing..."
+        echo "Installing... Wait a second"
         pip install -r backend/requirements.txt
         pip install flake8 pytest pytest-cov
 
