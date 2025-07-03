@@ -13,25 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.7
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Init
-      run: terraform init -chdir=infra/terraform
+      - name: Terraform Init
+        run: terraform init -input=false -no-color -chdir=infra/terraform
 
-    - name: Terraform Plan
-      run: terraform plan -out=tfplan -input=false -lock=false -var-file=infra/terraform/terraform.tfvars
+      - name: Terraform Plan
+        run: terraform plan -input=false -no-color -lock=false -out=tfplan -chdir=infra/terraform
 
-    #- name: Terraform Apply
-    #  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    #  run: terraform -chdir=apply -input=false -lock=false tfplan
+      #- name: Terraform Apply
+      #  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #  run: terraform apply -input=false -no-color tfplan -chdir=infra/terraform
