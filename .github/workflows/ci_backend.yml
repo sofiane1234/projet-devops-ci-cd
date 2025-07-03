@@ -1,62 +1,52 @@
-name: CI Backend
+name: CI Backend FastAPI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-  build-and-analyse:
+  backend-ci:
     runs-on: ubuntu-latest
 
+    env:
+      PYTHONPATH: backend
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      - name: Install Python dependencies
-        run: |
-          pip install --no-cache-dir -r backend/requirements.txt
-          pip install --no-cache-dir flake8 pytest pytest-cov
+    - name: Install dependencies
+      run: |
+        pip install -r backend/requirements.txt
+        pip install flake8 pytest pytest-cov
 
-      - name: Lint the backend code
-        run: flake8 backend
+    - name: Lint with Flake8
+      run: flake8 backend
 
-      - name: Run unit tests
-        run: pytest backend/tests --cov=backend --cov-report=term-missing
+    - name: Run tests with coverage
+      run: pytest backend/tests --cov=backend --cov-report=term-missing
 
-      - name: Install SonarScanner
-        run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip sonar-scanner-cli-5.0.1.3006-linux.zip
-          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH
+    - name: SonarCloud analysis
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
+          -Dsonar.organization=sofiane1234 \
+          -Dsonar.sources=backend \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=$SONAR_TOKEN
 
-      - name: Analyse statique avec SonarCloud
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
-            -Dsonar.organization=sofiane1234 \
-            -Dsonar.sources=backend \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
-
-      - name: Extract ACR credentials from JSON
-        run: |
-          ACR_USERNAME=$(echo '${{ secrets.ACR_CREDENTIALS }}' | jq -r .username)
-          ACR_PASSWORD=$(echo '${{ secrets.ACR_CREDENTIALS }}' | jq -r .passwords[0].value)
-          echo "ACR_USERNAME=$ACR_USERNAME" >> $GITHUB_ENV
-          echo "ACR_PASSWORD=$ACR_PASSWORD" >> $GITHUB_ENV
-
-      - name: Build & Push Docker image to ACR
-        run: |
-          docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
-          echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -u "$ACR_USERNAME" --password-stdin
-          docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
+    - name: Build and push Docker image
+      run: |
+        docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
+        echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -u "$ACR_USERNAME" --password-stdin
+        docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
