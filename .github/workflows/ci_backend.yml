@@ -34,24 +34,24 @@ jobs:
       run: flake8 backend
 
     - name: Run Pytest with coverage (XML for SonarCloud)
-      run: |
-        pytest backend/tests --cov=backend --cov-report=term-missing --cov-report=xml
-
+      run: pytest backend/tests --cov=backend --cov-report=xml:rapport/reports/coverage.xml --cov-report=term-missing
+    
     - name: Install SonarScanner
       run: |
         curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
         unzip sonar-scanner.zip
         echo "$(pwd)/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
 
-    - name: SonarCloud analysis (with coverage.xml)
+    - name: SonarCloud analysis
       run: |
         sonar-scanner \
-          -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
-          -Dsonar.organization=sofiane1234 \
-          -Dsonar.sources=backend \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.python.coverage.reportPaths=coverage.xml
+        -Dsonar.projectKey=sofiane1234_projet-devops-ci-cd \
+        -Dsonar.organization=sofiane1234 \
+        -Dsonar.sources=backend \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.login=$SONAR_TOKEN \
+        -Dsonar.python.coverage.reportPaths=rapport/coverage.xml
+
 
     - name: Build and push Docker image
       run: |
