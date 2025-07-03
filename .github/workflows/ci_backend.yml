@@ -54,5 +54,6 @@ jobs:
     - name: Build and push Docker image
       run: |
         docker build -t acrdevopssosso.azurecr.io/backend:${{ github.sha }} backend/
+        #Test connexion
         echo "$ACR_PASSWORD" | docker login acrdevopssosso.azurecr.io -u "$ACR_USERNAME" --password-stdin
         docker push acrdevopssosso.azurecr.io/backend:${{ github.sha }}
