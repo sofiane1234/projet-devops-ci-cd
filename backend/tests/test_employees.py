@@ -3,6 +3,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 def test_get_employees_route():
     response = client.get("/employees")
     assert response.status_code == 200
