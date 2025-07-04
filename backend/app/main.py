@@ -1,61 +1,37 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List
-import psycopg2
-import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import psycopg2
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_NAME = os.getenv("DB_NAME", "employeesdb")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
 
-def get_connection():
+def connect():
     return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
+        host="pg-sosso-devops-ci-cd.postgres.database.azure.com",
+        database="employeesdb",
+        user="adminuser@pg-sosso-devops-ci-cd",
+        password="SuperSecretPassword123"
     )
 
-class Employee(BaseModel):
-    id: int
-    name: str
-    role: str
 
-@app.get("/employees", response_model=List[Employee])
+@app.get("/employees")
 def get_employees():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, name, role FROM employees;")
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [{"id": r[0], "name": r[1], "role": r[2]} for r in rows]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, role FROM employees;")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [{"id": r[0], "name": r[1], "role": r[2]} for r in rows]
 
-@app.post("/employees", response_model=Employee)
-def add_employee(emp: Employee):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("INSERT INTO employees (id, name, role) VALUES (%s, %s, %s);",
-                    (emp.id, emp.name, emp.role))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return emp
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+def root():
+    return {"message": "Bienvenue dans l’API employé"}
