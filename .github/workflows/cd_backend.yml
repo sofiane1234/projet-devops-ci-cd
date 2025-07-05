@@ -35,9 +35,9 @@ jobs:
       - name: Configure container image (staging)
         run: |
           az webapp config container set \
-            --name backend-staging \
+            --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
-            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest
+            --container-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (staging)
         run: |
@@ -47,7 +47,7 @@ jobs:
             --query value -o tsv)
 
           az webapp config appsettings set \
-            --name backend-staging \
+            --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
             --settings BACKEND_ENV=$ENV_VALUE
 
@@ -82,7 +82,7 @@ jobs:
           az webapp config container set \
             --name backend-prod \
             --resource-group rg-sosso-devops-ci-cd \
-            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest
+            --container-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (production)
         run: |
