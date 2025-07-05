@@ -1,4 +1,4 @@
-name: CI DevOps Frontend
+name: CI Frontend
 
 on:
   push:
@@ -32,9 +32,17 @@ jobs:
       run: npm run lint
       continue-on-error: true
 
-    - name: Run tests (Jest)
+    - name: Copy test folder for CRA compatibility
+      working-directory: frontend
+      run: cp -r test src/test-ci
+
+    - name: Run unit tests (Jest)
       working-directory: frontend
       run: npm test -- --watchAll=false --coverage
+
+    - name: Clean up temporary test folder
+      working-directory: frontend
+      run: rm -rf src/test-ci
 
     - name: Build React app
       working-directory: frontend
@@ -51,7 +59,7 @@ jobs:
         docker push acrdevopssosso.azurecr.io/frontend:${{ github.sha }}
         docker push acrdevopssosso.azurecr.io/frontend:latest
 
-    - name: Scan vulnérabilités avec Trivy
+    - name: Scan vulnerabilities with Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
         ./bin/trivy image acrdevopssosso.azurecr.io/frontend:latest
