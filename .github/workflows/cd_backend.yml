@@ -32,13 +32,7 @@ jobs:
           docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
           docker push acrdevopssosso.azurecr.io/backend:latest
 
-      - name: Create Azure Web App (staging)
-        run: |
-          az webapp create --name backend-staging \
-                          --resource-group rg-sosso-devops-ci-cd \
-                          --plan asp-sosso-devops-ci-cd
-
-      - name: Configure image in Azure Web App (staging)
+      - name: Configure container image (staging)
         run: |
           az webapp config container set \
             --name backend-staging \
@@ -83,13 +77,7 @@ jobs:
           docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
           docker push acrdevopssosso.azurecr.io/backend:latest
 
-      - name: Create Azure Web App (production)
-        run: |
-          az webapp create --name backend-prod \
-                          --resource-group rg-sosso-devops-ci-cd \
-                          --plan asp-sosso-devops-ci-cd
-
-      - name: Configure image in Azure Web App (production)
+      - name: Configure container image (production)
         run: |
           az webapp config container set \
             --name backend-prod \
