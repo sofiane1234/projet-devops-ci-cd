@@ -75,4 +75,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: couverture-tests-backend
-        path: ../rapport/coverage.xml
+        path: /rapport/coverage.xml
