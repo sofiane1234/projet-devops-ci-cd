@@ -38,9 +38,9 @@ jobs:
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
             --container-image-name acrdevopssosso.azurecr.io/backend:latest \
-            --docker-registry-server-url https://acrdevopssosso.azurecr.io \
-            --docker-registry-server-user ${{ secrets.ACR_USERNAME }} \
-            --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+            --container-registry-url https://acrdevopssosso.azurecr.io \
+            --container-registry-user ${{ secrets.ACR_USERNAME }} \
+            --container-registry-password ${{ secrets.ACR_PASSWORD }}
 
       - name: Inject BACKEND_ENV into Azure Web App (staging)
         run: |
