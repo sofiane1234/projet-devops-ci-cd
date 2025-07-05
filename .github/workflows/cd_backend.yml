@@ -29,7 +29,7 @@ jobs:
 
           az webapp config appsettings set \
             --name backend-staging \
-            --resource-group RG-TP \
+            --resource-group rg-sosso-devops-ci-cd \
             --settings BACKEND_ENV=$ENV_VALUE
 
       - name: Build Docker image
@@ -47,7 +47,7 @@ jobs:
       - name: Deploy container to Azure (staging)
         run: |
           az webapp create --name backend-staging \
-                          --resource-group RG-TP \
+                          --resource-group rg-sosso-devops-ci-cd \
                           --plan backend-plan \
                           --deployment-container-image-name myacr.azurecr.io/backend:latest
 
@@ -74,7 +74,7 @@ jobs:
 
           az webapp config appsettings set \
             --name backend-prod \
-            --resource-group RG-TP \
+            --resource-group rg-sosso-devops-ci-cd \
             --settings BACKEND_ENV=$ENV_VALUE
 
       - name: Build Docker image
@@ -92,6 +92,6 @@ jobs:
       - name: Deploy container to Azure (production)
         run: |
           az webapp create --name backend-prod \
-                          --resource-group RG-TP \
+                          --resource-group rg-sosso-devops-ci-cd \
                           --plan backend-plan \
                           --deployment-container-image-name myacr.azurecr.io/backend:latest
