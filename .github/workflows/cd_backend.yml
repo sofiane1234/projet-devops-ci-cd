@@ -25,19 +25,19 @@ jobs:
         run: docker build -t backend:latest .
 
       - name: Login to ACR
-        run: echo ${{ secrets.ACR_PASSWORD }} | docker login myacr.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
 
       - name: Tag & push backend image
         run: |
-          docker tag backend:latest myacr.azurecr.io/backend:latest
-          docker push myacr.azurecr.io/backend:latest
+          docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
+          docker push acrdevopssosso.azurecr.io/backend:latest
 
       - name: Deploy container to Azure (staging)
         run: |
           az webapp create --name backend-staging \
                           --resource-group rg-sosso-devops-ci-cd \
                           --plan backend-plan \
-                          --deployment-container-image-name myacr.azurecr.io/backend:latest
+                          --deployment-container-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (staging)
         run: |
@@ -70,19 +70,19 @@ jobs:
         run: docker build -t backend:latest .
 
       - name: Login to ACR
-        run: echo ${{ secrets.ACR_PASSWORD }} | docker login myacr.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
 
       - name: Tag & push backend image
         run: |
-          docker tag backend:latest myacr.azurecr.io/backend:latest
-          docker push myacr.azurecr.io/backend:latest
+          docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
+          docker push acrdevopssosso.azurecr.io/backend:latest
 
       - name: Deploy container to Azure (production)
         run: |
           az webapp create --name backend-prod \
                           --resource-group rg-sosso-devops-ci-cd \
                           --plan backend-plan \
-                          --deployment-container-image-name myacr.azurecr.io/backend:latest
+                          --deployment-container-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (production)
         run: |
