@@ -34,4 +34,4 @@ def get_employees():
 
 @app.get("/")
 def root():
-    return {"message": "Bienvenue dans l’API employé"}
+    return {"message": "Bienvenue dans l'API employé"}
