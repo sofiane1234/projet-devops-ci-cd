@@ -1,4 +1,4 @@
-name: CI Frontend
+name: CI DevOps Frontend
 
 on:
   push:
@@ -32,17 +32,9 @@ jobs:
       run: npm run lint
       continue-on-error: true
 
-    - name: Copy test file for CRA compatibility
-      working-directory: frontend
-      run: cp -r test src/test-ci
-
     - name: Run tests (Jest)
       working-directory: frontend
       run: npm test -- --watchAll=false --coverage
-
-    - name: Remove temporary test folder
-      working-directory: frontend
-      run: rm -rf src/test-ci
 
     - name: Build React app
       working-directory: frontend
