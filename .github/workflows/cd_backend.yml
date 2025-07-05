@@ -59,7 +59,7 @@ jobs:
 
       - name: Get backend secrets (production)
         run: |
-          az keyvault secret show --vault-name kv-devops-ci --name BACKEND_ENV_PROD --query value -o tsv >> .env
+          az keyvault secret show --vault-name kv-sosso-devops-ci-cd --name BACKEND_ENV_PROD --query value -o tsv >> .env
 
       - name: Build Docker image
         working-directory: backend
