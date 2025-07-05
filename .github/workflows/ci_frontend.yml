@@ -27,16 +27,16 @@ jobs:
       working-directory: frontend
       run: npm install
 
-    - name: Lint (ESLint)
+    - name: Lint
       working-directory: frontend
       run: npm run lint
       continue-on-error: true
 
-    - name: Run tests with raw Jest
+    - name: Run tests with Jest
       working-directory: frontend
       run: npm run ci-test
 
-    - name: Build React app
+    - name: Build frontend
       working-directory: frontend
       run: npm run build
 
@@ -44,19 +44,19 @@ jobs:
       run: |
         echo "${ACR_PASSWORD}" | docker login acrdevopssosso.azurecr.io -u "${ACR_USERNAME}" --password-stdin
 
-    - name: Build and push Docker image
+    - name: Build and push image
       run: |
         docker build -t acrdevopssosso.azurecr.io/frontend:${{ github.sha }} frontend/
         docker tag acrdevopssosso.azurecr.io/frontend:${{ github.sha }} acrdevopssosso.azurecr.io/frontend:latest
         docker push acrdevopssosso.azurecr.io/frontend:${{ github.sha }}
         docker push acrdevopssosso.azurecr.io/frontend:latest
 
-    - name: Scan vulnerabilities with Trivy
+    - name: Trivy scan
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
         ./bin/trivy image acrdevopssosso.azurecr.io/frontend:latest
 
-    - name: Archive coverage report
+    - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
         name: couverture-tests-frontend
