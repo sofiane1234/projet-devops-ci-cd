@@ -20,9 +20,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Get backend secrets (staging)
+      - name: Get backend secret (staging)
         run: |
-          az keyvault secret show --vault-name kv-sosso-devops-ci-cd --name BACKEND_ENV --query value -o tsv >> .env
+          ENV_VALUE=$(az keyvault secret show \
+            --vault-name kv-sosso-devops-ci-cd \
+            --name backend-env \
+            --query value -o tsv)
+
+          az webapp config appsettings set \
+            --name backend-staging \
+            --resource-group RG-TP \
+            --settings BACKEND_ENV=$ENV_VALUE
 
       - name: Build Docker image
         working-directory: backend
@@ -57,9 +65,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Get backend secrets (production)
+      - name: Get backend secret (production)
         run: |
-          az keyvault secret show --vault-name kv-sosso-devops-ci-cd --name BACKEND_ENV_PROD --query value -o tsv >> .env
+          ENV_VALUE=$(az keyvault secret show \
+            --vault-name kv-sosso-devops-ci-cd \
+            --name backend-env-prod \
+            --query value -o tsv)
+
+          az webapp config appsettings set \
+            --name backend-prod \
+            --resource-group RG-TP \
+            --settings BACKEND_ENV=$ENV_VALUE
 
       - name: Build Docker image
         working-directory: backend
