@@ -32,12 +32,18 @@ jobs:
           docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
           docker push acrdevopssosso.azurecr.io/backend:latest
 
-      - name: Deploy container to Azure (staging)
+      - name: Create Azure Web App (staging)
         run: |
           az webapp create --name backend-staging \
                           --resource-group rg-sosso-devops-ci-cd \
-                          --plan backend-plan \
-                          --deployment-container-image-name acrdevopssosso.azurecr.io/backend:latest
+                          --plan asp-sosso-devops-ci-cd
+
+      - name: Configure image in Azure Web App (staging)
+        run: |
+          az webapp config container set \
+            --name backend-staging \
+            --resource-group rg-sosso-devops-ci-cd \
+            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (staging)
         run: |
@@ -77,12 +83,18 @@ jobs:
           docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
           docker push acrdevopssosso.azurecr.io/backend:latest
 
-      - name: Deploy container to Azure (production)
+      - name: Create Azure Web App (production)
         run: |
           az webapp create --name backend-prod \
                           --resource-group rg-sosso-devops-ci-cd \
-                          --plan backend-plan \
-                          --deployment-container-image-name acrdevopssosso.azurecr.io/backend:latest
+                          --plan asp-sosso-devops-ci-cd
+
+      - name: Configure image in Azure Web App (production)
+        run: |
+          az webapp config container set \
+            --name backend-prod \
+            --resource-group rg-sosso-devops-ci-cd \
+            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest
 
       - name: Inject BACKEND_ENV into Azure Web App (production)
         run: |
