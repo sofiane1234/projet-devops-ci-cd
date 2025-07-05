@@ -2,36 +2,70 @@ name: CI Frontend
 
 on:
   push:
-    paths:
-      - 'frontend/**'
+    branches: [ main ]
   pull_request:
-    paths:
-      - 'frontend/**'
+    branches: [ main ]
 
 jobs:
-  ci-frontend:
+  frontend-ci:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
+    env:
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-      - run: npm ci
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm install
 
-      - run: cp -r test src/test-ci
+    - name: Lint (ESLint)
+      working-directory: frontend
+      run: npm run lint
+      continue-on-error: true
 
-      - run: npm test -- --watchAll=false --coverage
+    - name: Copy test file for CRA compatibility
+      working-directory: frontend
+      run: cp -r test src/test-ci
 
-      - run: rm -rf src/test-ci
+    - name: Run tests (Jest)
+      working-directory: frontend
+      run: npm test -- --watchAll=false --coverage
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: couverture-tests-frontend
-          path: coverage
+    - name: Remove temporary test folder
+      working-directory: frontend
+      run: rm -rf src/test-ci
+
+    - name: Build React app
+      working-directory: frontend
+      run: npm run build
+
+    - name: Docker login
+      run: |
+        echo "${ACR_PASSWORD}" | docker login acrdevopssosso.azurecr.io -u "${ACR_USERNAME}" --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t acrdevopssosso.azurecr.io/frontend:${{ github.sha }} frontend/
+        docker tag acrdevopssosso.azurecr.io/frontend:${{ github.sha }} acrdevopssosso.azurecr.io/frontend:latest
+        docker push acrdevopssosso.azurecr.io/frontend:${{ github.sha }}
+        docker push acrdevopssosso.azurecr.io/frontend:latest
+
+    - name: Scan vulnérabilités avec Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+        ./bin/trivy image acrdevopssosso.azurecr.io/frontend:latest
+
+    - name: Archive Jest coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: couverture-tests-frontend
+        path: frontend/coverage
