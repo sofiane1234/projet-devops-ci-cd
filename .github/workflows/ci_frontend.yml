@@ -1,40 +1,21 @@
-name: CI Projet DevOps
+name: CI DevOps Frontend
 
 on:
   push:
     paths:
-      - '**'
+      - 'frontend/**'
   pull_request:
     paths:
-      - '**'
+      - 'frontend/**'
 
 jobs:
-  ci-backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - run: pip install -r requirements.txt
-
-      - run: pytest --cov=backend --cov-report=xml:rapport/coverage.xml
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: couverture-tests-backend
-          path: rapport/coverage.xml
-
   ci-frontend:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
 
