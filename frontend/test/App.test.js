@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import App from '../App';
 
 beforeEach(() => {
@@ -27,19 +27,10 @@ describe('App component', () => {
 
   test('affiche les employés après le fetch', async () => {
     render(<App />);
-
-    await waitFor(() =>
-      expect(screen.getByText(/Alice/i)).toBeInTheDocument()
-    );
-    await waitFor(() =>
-      expect(screen.getByText(/Engineer/i)).toBeInTheDocument()
-    );
-    await waitFor(() =>
-      expect(screen.getByText(/Bob/i)).toBeInTheDocument()
-    );
-    await waitFor(() =>
-      expect(screen.getByText(/Manager/i)).toBeInTheDocument()
-    );
+    expect(await screen.findByText(/Alice/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Engineer/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Bob/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Manager/i)).toBeInTheDocument();
   });
 
   test('affiche un message de chargement pendant le fetch', () => {
