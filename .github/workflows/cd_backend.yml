@@ -42,6 +42,14 @@ jobs:
             --container-registry-user ${{ secrets.ACR_USERNAME }} \
             --container-registry-password ${{ secrets.ACR_PASSWORD }}
 
+      - name: Debug backend-env secret (temporary)
+        run: |
+          ENV_VALUE=$(az keyvault secret show \
+            --vault-name kv-sosso-devops-ci-cd \
+            --name backend-env \
+            --query value -o tsv)
+          echo "DEBUG - BACKEND_ENV value from Key Vault: $ENV_VALUE"
+
       - name: Inject BACKEND_ENV into Azure Web App (staging)
         run: |
           ENV_VALUE=$(az keyvault secret show \
@@ -53,6 +61,12 @@ jobs:
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
             --settings BACKEND_ENV=$ENV_VALUE
+
+      - name: Restart Web App (staging)
+        run: |
+          az webapp restart \
+            --name sosso-backend-staging \
+            --resource-group rg-sosso-devops-ci-cd
 
   deploy-production:
     if: github.event_name == 'workflow_dispatch'
