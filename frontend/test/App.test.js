@@ -28,12 +28,18 @@ describe('App component', () => {
   test('affiche les employés après le fetch', async () => {
     render(<App />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Alice/i)).toBeInTheDocument();
-      expect(screen.getByText(/Engineer/i)).toBeInTheDocument();
-      expect(screen.getByText(/Bob/i)).toBeInTheDocument();
-      expect(screen.getByText(/Manager/i)).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.getByText(/Alice/i)).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/Engineer/i)).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/Bob/i)).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/Manager/i)).toBeInTheDocument()
+    );
   });
 
   test('affiche un message de chargement pendant le fetch', () => {

@@ -32,17 +32,9 @@ jobs:
       run: npm run lint
       continue-on-error: true
 
-    - name: Copy test folder for CRA compatibility
+    - name: Run tests with raw Jest
       working-directory: frontend
-      run: cp -r test src/test-ci
-
-    - name: Run unit tests (Jest)
-      working-directory: frontend
-      run: npm test -- --watchAll=false --coverage
-
-    - name: Clean up temporary test folder
-      working-directory: frontend
-      run: rm -rf src/test-ci
+      run: npm run ci-test
 
     - name: Build React app
       working-directory: frontend
@@ -64,7 +56,7 @@ jobs:
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
         ./bin/trivy image acrdevopssosso.azurecr.io/frontend:latest
 
-    - name: Archive Jest coverage report
+    - name: Archive coverage report
       uses: actions/upload-artifact@v4
       with:
         name: couverture-tests-frontend

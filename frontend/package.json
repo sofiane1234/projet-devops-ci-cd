@@ -6,7 +6,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "ci-test": "jest --coverage"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -19,15 +20,22 @@
   },
   "jest": {
     "roots": [
-      "<rootDir>/src",
       "<rootDir>/test"
-    ]
+    ],
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ],
+    "collectCoverage": true,
+    "coverageDirectory": "coverage"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "testing-library/no-wait-for-multiple-assertions": "warn"
+    }
   },
   "browserslist": {
     "production": [
