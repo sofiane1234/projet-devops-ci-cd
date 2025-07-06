@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
+
   deploy-staging:
     runs-on: ubuntu-latest
     environment: staging
@@ -20,42 +21,36 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build, tag & push image to ACR
+      - name: Build, tag & push image to ACR (staging)
         working-directory: backend
         run: |
-          docker build -t backend:latest .
-          docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
+          docker build -t backend:staging .
+          docker tag backend:staging acrdevopssosso.azurecr.io/backend:staging
           echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
-          docker push acrdevopssosso.azurecr.io/backend:latest
+          docker push acrdevopssosso.azurecr.io/backend:staging
 
-      - name: Configure container image (MSI only)
+      - name: Configure Web App STAGING
         run: |
           az webapp config container set \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
-            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest \
+            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:staging \
             --docker-registry-server-url https://acrdevopssosso.azurecr.io
 
-      - name: Inject BACKEND_ENV from Key Vault
+      - name: Inject secrets from Key Vault (STAGING)
         run: |
           az webapp config appsettings set \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
-            --settings BACKEND_ENV="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/backend-env/)"
+            --settings BACKEND_ENV="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/backend-env/)" \
+                      DB_PASSWORD="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/db-password/)"
 
-      - name: Inject DB_PASSWORD from Key Vault (exemple supplémentaire)
-        run: |
-          az webapp config appsettings set \
-            --name sosso-backend-staging \
-            --resource-group rg-sosso-devops-ci-cd \
-            --settings DB_PASSWORD="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/db-password/)"
-
-      - name: Restart Web App to apply new image + settings
+      - name: Restart Web App STAGING
         run: |
           az webapp restart \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd
-            
+
   deploy-production:
     runs-on: ubuntu-latest
     environment: production
@@ -70,7 +65,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build, tag & push image to ACR
+      - name: Build, tag & push image to ACR (prod)
         working-directory: backend
         run: |
           docker build -t backend:prod .
@@ -78,7 +73,7 @@ jobs:
           echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
           docker push acrdevopssosso.azurecr.io/backend:prod
 
-      - name: Configure Web App production
+      - name: Configure Web App PRODUCTION
         run: |
           az webapp config container set \
             --name sosso-backend-prod \
@@ -86,7 +81,7 @@ jobs:
             --docker-custom-image-name acrdevopssosso.azurecr.io/backend:prod \
             --docker-registry-server-url https://acrdevopssosso.azurecr.io
 
-      - name: Inject secrets from Key Vault
+      - name: Inject secrets from Key Vault (PROD)
         run: |
           az webapp config appsettings set \
             --name sosso-backend-prod \
@@ -94,7 +89,7 @@ jobs:
             --settings BACKEND_ENV="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/backend-env/)" \
                       DB_PASSWORD="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/db-password/)"
 
-      - name: Restart Web App production
+      - name: Restart Web App PRODUCTION
         run: |
           az webapp restart \
             --name sosso-backend-prod \
