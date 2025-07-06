@@ -7,18 +7,21 @@ app = FastAPI()
 
 def extract(val, default=None):
     try:
-        return json.loads(val)["value"]
+        parsed = json.loads(val)
+        if isinstance(parsed, dict) and "value" in parsed:
+            return parsed["value"]
     except Exception:
-        return val or default
+        pass
+    return val or default
 
 def connect():
     return psycopg2.connect(
-        host=extract(os.getenv("DB_HOST"), "localhost"),
-        port=int(extract(os.getenv("DB_PORT"), 5432)),
-        database=extract(os.getenv("DB_NAME"), "employees"),
-        user=extract(os.getenv("DB_USER"), "postgres"),
-        password=extract(os.getenv("DB_PASSWORD"), "postgres"),
-        sslmode="require",              # SSL obligatoire pour Azure PostgreSQL
+        host=extract(os.getenv("DB_HOST")),
+        port=int(extract(os.getenv("DB_PORT", "5432"))),
+        database=extract(os.getenv("DB_NAME")),
+        user=extract(os.getenv("DB_USER")),
+        password=extract(os.getenv("DB_PASSWORD")),
+        sslmode="require",
         connect_timeout=5
     )
 
