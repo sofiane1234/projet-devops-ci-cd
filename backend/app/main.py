@@ -7,7 +7,7 @@ app = FastAPI()
 
 def extract(val, default=None):
     try:
-        parsed = json.loads(val)
+        parsed = json.loads(val.replace("'", "\""))  # ← Corrige le JSON avec simples quotes
         if isinstance(parsed, dict) and "value" in parsed:
             return parsed["value"]
     except Exception:
