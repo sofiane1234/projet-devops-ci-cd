@@ -20,95 +20,38 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build Docker image
+      - name: Build, tag & push image to ACR
         working-directory: backend
-        run: docker build -t backend:latest .
-
-      - name: Login to ACR
-        run: echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
-
-      - name: Tag & push backend image
         run: |
+          docker build -t backend:latest .
           docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
+          echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
           docker push acrdevopssosso.azurecr.io/backend:latest
 
-      - name: Configure container image (staging)
+      - name: Configure container image (MSI only)
         run: |
           az webapp config container set \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
-            --container-image-name acrdevopssosso.azurecr.io/backend:latest \
-            --container-registry-url https://acrdevopssosso.azurecr.io \
-            --container-registry-user ${{ secrets.ACR_USERNAME }} \
-            --container-registry-password ${{ secrets.ACR_PASSWORD }}
+            --docker-custom-image-name acrdevopssosso.azurecr.io/backend:latest \
+            --docker-registry-server-url https://acrdevopssosso.azurecr.io
 
-      - name: Debug backend-env secret (temporary)
+      - name: Inject BACKEND_ENV from Key Vault
         run: |
-          ENV_VALUE=$(az keyvault secret show \
-            --vault-name kv-sosso-devops-ci-cd \
-            --name backend-env \
-            --query value -o tsv)
-          echo "DEBUG - BACKEND_ENV value from Key Vault: $ENV_VALUE"
-
-      - name: Inject BACKEND_ENV into Azure Web App (staging)
-        run: |
-          ENV_VALUE=$(az keyvault secret show \
-            --vault-name kv-sosso-devops-ci-cd \
-            --name backend-env \
-            --query value -o tsv)
-
           az webapp config appsettings set \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd \
-            --settings BACKEND_ENV=$ENV_VALUE
+            --settings BACKEND_ENV="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/backend-env/)"
 
-      - name: Restart Web App (staging)
+      - name: Inject DB_PASSWORD from Key Vault (exemple supplémentaire)
+        run: |
+          az webapp config appsettings set \
+            --name sosso-backend-staging \
+            --resource-group rg-sosso-devops-ci-cd \
+            --settings DB_PASSWORD="@Microsoft.KeyVault(SecretUri=https://kv-sosso-devops-ci-cd.vault.azure.net/secrets/db-password/)"
+
+      - name: Restart Web App to apply new image + settings
         run: |
           az webapp restart \
             --name sosso-backend-staging \
             --resource-group rg-sosso-devops-ci-cd
-
-  deploy-production:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    environment: production
-
-    steps:
-      - name: Checkout backend
-        uses: actions/checkout@v3
-
-      - name: Azure login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Build Docker image
-        working-directory: backend
-        run: docker build -t backend:latest .
-
-      - name: Login to ACR
-        run: echo ${{ secrets.ACR_PASSWORD }} | docker login acrdevopssosso.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
-
-      - name: Tag & push backend image
-        run: |
-          docker tag backend:latest acrdevopssosso.azurecr.io/backend:latest
-          docker push acrdevopssosso.azurecr.io/backend:latest
-
-      - name: Configure container image (production)
-        run: |
-          az webapp config container set \
-            --name backend-prod \
-            --resource-group rg-sosso-devops-ci-cd \
-            --container-image-name acrdevopssosso.azurecr.io/backend:latest
-
-      - name: Inject BACKEND_ENV into Azure Web App (production)
-        run: |
-          ENV_VALUE=$(az keyvault secret show \
-            --vault-name kv-sosso-devops-ci-cd \
-            --name backend-env-prod \
-            --query value -o tsv)
-
-          az webapp config appsettings set \
-            --name backend-prod \
-            --resource-group rg-sosso-devops-ci-cd \
-            --settings BACKEND_ENV=$ENV_VALUE
