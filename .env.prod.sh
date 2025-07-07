@@ -1,0 +1,5 @@
+DB_HOST="pg-sosso-devops-ci-cd.postgres.database.azure.com"
+DB_PORT="5432"
+DB_NAME="employees"
+DB_USER="m2admin@pg-sosso-devops-ci-cd"
+DB_PASSWORD="Draris_1126?"
