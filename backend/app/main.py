@@ -19,7 +19,7 @@ def extract(val, default=None):
 def connect():
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", "5432")),
+        port=int(extract(os.getenv("DB_PORT"), default="5432")),
         user=os.getenv("DB_USER"),
         password=extract(os.getenv("DB_PASSWORD")),
         dbname=os.getenv("DB_NAME"),
@@ -54,3 +54,12 @@ def get_employees():
         return [{"id": r[0], "name": r[1], "role": r[2]} for r in rows]
     except Exception as e:
         return {"error": str(e)}
+
+
+@app.get("/debug-password")
+def debug_password():
+    raw = os.getenv("DB_PASSWORD")
+    return {
+        "raw": raw,
+        "extracted": extract(raw)
+    }
