@@ -16,14 +16,13 @@ def extract(val, default=None):
 
 def connect():
     return psycopg2.connect(
-        host=extract(os.getenv("DB_HOST")),
-        port=int(extract(os.getenv("DB_PORT", "5432"))),
-        database=extract(os.getenv("DB_NAME")),
-        user=extract(os.getenv("DB_USER")),
+        host=os.getenv("DB_HOST"),
+        port=5432,
+        user=os.getenv("DB_USER"),
         password=extract(os.getenv("DB_PASSWORD")),
-        sslmode="require",
-        connect_timeout=5
-    )
+        dbname=os.getenv("DB_NAME"),
+        sslmode="require"
+)
 
 @app.get("/")
 def root():

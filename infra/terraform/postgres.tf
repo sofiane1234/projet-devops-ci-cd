@@ -9,7 +9,7 @@ data "azurerm_key_vault_secret" "postgres_password" {
 }
 
 resource "azurerm_postgresql_flexible_server" "pg" {
-  name                   = "pg-sosso-devops-ci-cd"
+  name                   = "pg-sosso-devops-cicd"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "13"
