@@ -5,6 +5,7 @@ import json
 
 app = FastAPI()
 
+
 def extract(val, default=None):
     try:
         parsed = json.loads(val.replace("'", "\""))
@@ -14,6 +15,7 @@ def extract(val, default=None):
         pass
     return val or default
 
+
 def connect():
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
@@ -22,11 +24,13 @@ def connect():
         password=extract(os.getenv("DB_PASSWORD")),
         dbname=os.getenv("DB_NAME"),
         sslmode="require"
-)
+    )
+
 
 @app.get("/")
 def root():
     return {"message": "Bienvenue dans l'API employé"}
+
 
 @app.get("/health-db")
 def health_db():
@@ -36,6 +40,7 @@ def health_db():
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+
 
 @app.get("/employees")
 def get_employees():
